@@ -1,0 +1,52 @@
+package hello.springtx.propagation;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class MemberService {
+
+    private final MemberRepository memberRepository;
+    private final LogRepository logRepository;
+
+    // @Transactional
+    public void joinV1(String username) {
+        Member member = new Member(username);
+        Log logMessasge = new Log(username);
+
+        log.info("MemberRepository 호출 시작");
+        memberRepository.save(member);
+        log.info("MemberRepository 호출 종료");
+
+        log.info("LogRepository 호출 시작");
+        logRepository.save(logMessasge);
+        log.info("LogRepository 호출 종료");
+
+    }
+
+    @Transactional
+    public void joinV2(String username) {
+        Member member = new Member(username);
+        Log logMessasge = new Log(username);
+
+        log.info("MemberRepository 호출 시작");
+        memberRepository.save(member);
+        log.info("MemberRepository 호출 종료");
+
+        log.info("LogRepository 호출 시작");
+        try {
+            logRepository.save(logMessasge);
+        } catch (RuntimeException e) {
+            log.info("log 저장에 실패했습니다. logMessage = {}", logMessasge);
+            log.info("정상 흐름 반환");
+        }
+        log.info("LogRepository 호출 종료");
+
+    }
+
+}
